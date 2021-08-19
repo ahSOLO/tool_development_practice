@@ -85,14 +85,14 @@ public class Snap : EditorWindow
     private void OnGUI()
     {
         so.Update();
-        EditorGUILayout.PropertyField(propGridType);
-        EditorGUILayout.PropertyField(propGridOrigin);
-        EditorGUILayout.PropertyField(propCellSize);
-        if (gridType == GridType.Polar)
-        {
-            EditorGUILayout.PropertyField(propPolarDivisions);
-            propPolarDivisions.intValue = Math.Max(2, propPolarDivisions.intValue);
-        }
+            EditorGUILayout.PropertyField(propGridType);
+            EditorGUILayout.PropertyField(propGridOrigin);
+            EditorGUILayout.PropertyField(propCellSize);
+            if (gridType == GridType.Polar)
+            {
+                EditorGUILayout.PropertyField(propPolarDivisions);
+                propPolarDivisions.intValue = Math.Max(2, propPolarDivisions.intValue);
+            }
         so.ApplyModifiedProperties();
 
         using (new EditorGUI.DisabledScope(Selection.gameObjects.Length == 0))
@@ -116,41 +116,18 @@ public class Snap : EditorWindow
     {
         if (gridType == GridType.Cartesian)
             return position.Round(gridOrigin, cellSize);
+
         else if (gridType == GridType.Polar)
         {
             if (polarDivisions < 2)
                 return gridOrigin;
             
             Vector3 diff = position - gridOrigin;
-            float closestRadius = float.MaxValue;
-            float closestSM = float.MaxValue;
-            float closestLineRot = 0f;
-            float closestDot = -1f;
+            float closestRadius = diff.magnitude.Round(cellSize);
+            float diffRotation = Mathf.Atan2(diff.z, diff.x);
+            float closestRot = diffRotation.Round( (2f * Mathf.PI) / polarDivisions);
 
-            for (float i = 1 * cellSize; i < 10 * cellSize; i += cellSize)
-            {
-                var diffSM = (diff - (diff.normalized * i)).sqrMagnitude;
-                if ( diffSM < closestSM )
-                {
-                    closestRadius = i;
-                    closestSM = diffSM;
-                }
-                else
-                    break;
-            }
-            
-            for (float i = 0; i <= polarDivisions; i += cellSize)
-            {
-                float rot = i * (360f / (float)polarDivisions);
-                float dot = Vector3.Dot(diff.normalized, Quaternion.AngleAxis(rot, Vector3.up) * Vector3.forward);
-                if (dot > closestDot)
-                {
-                    closestDot = dot;
-                    closestLineRot = rot;
-                }    
-            }
-
-            return gridOrigin + (Quaternion.AngleAxis(closestLineRot, Vector3.up) * Vector3.forward * closestRadius);
+            return gridOrigin + (new Vector3(Mathf.Cos(closestRot), 0f, Mathf.Sin(closestRot)) * closestRadius);
         }
         return position;
     }
