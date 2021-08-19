@@ -72,13 +72,13 @@ public class Snap : EditorWindow
 
     private void DrawCartesianGrid(Vector3 gridOrigin, float cellSize)
     {
-        for (float x = -5 * cellSize; x < 10 * cellSize; x += cellSize)
+        for (float x = -10 * cellSize; x <= 10 * cellSize; x += cellSize)
         {
-            Handles.DrawAAPolyLine(0.2f, new Vector3(x, 0, -10) + gridOrigin, new Vector3(x, 0, 10) + gridOrigin);
+            Handles.DrawAAPolyLine(0.4f, new Vector3(x, 0, -10 * cellSize) + gridOrigin, new Vector3(x, 0, 10 * cellSize) + gridOrigin);
         }
-        for (float z = -5 * cellSize; z < 10 * cellSize; z += cellSize)
+        for (float z = -10 * cellSize; z <= 10 * cellSize; z += cellSize)
         {
-            Handles.DrawAAPolyLine(0.2f, new Vector3(-10, 0, z) + gridOrigin, new Vector3(10, 0, z) + gridOrigin);
+            Handles.DrawAAPolyLine(0.4f, new Vector3(- 10 * cellSize, 0, z) + gridOrigin, new Vector3(10 * cellSize, 0, z) + gridOrigin);
         }
     }
 
