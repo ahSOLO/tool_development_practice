@@ -82,8 +82,27 @@ public class Placer : EditorWindow
         Ray ray = new Ray(camT.transform.position, camT.ScreenToWorldPoint(new Vector3(Event.current.mousePosition.x, camT.pixelHeight - Event.current.mousePosition.y, 100f)) - camT.transform.position);
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            Handles.DrawAAPolyLine(hit.point, hit.point + hit.normal);
-            Handles.DrawWireDisc(hit.point, hit.normal, radius);
+            Handles.DrawAAPolyLine(4f, hit.point, hit.point + hit.normal);
+            // Handles.DrawWireDisc(hit.point, hit.normal, radius);
+
+            Vector3 tangent = Vector3.Cross(hit.normal, camT.transform.forward);
+            Vector3 bitangent = Vector3.Cross(hit.normal, tangent);
+
+            int circleDetail = 64;
+            RaycastHit prevCircDrawHit;
+            Physics.Raycast(hit.point + tangent * radius + hit.normal * 4f, -hit.normal, out prevCircDrawHit, 50f);
+            for (int i = 1; i < circleDetail + 1; i++)
+            {
+                var pointOnCircle = hit.point + Quaternion.AngleAxis(i * 360 / circleDetail, hit.normal) * (tangent * radius);
+                Ray circDrawRay = new Ray(pointOnCircle + hit.normal * 4f, -hit.normal);
+                RaycastHit circDrawHit;
+                if (!Physics.Raycast(circDrawRay, out circDrawHit, 50f))
+                {
+                    circDrawHit.point = pointOnCircle;
+                }
+                Handles.DrawAAPolyLine(2f, prevCircDrawHit.point, circDrawHit.point);
+                prevCircDrawHit = circDrawHit;
+            }
 
             if (Event.current.button == 0 && Event.current.type == EventType.MouseDown)
             {
@@ -92,7 +111,7 @@ public class Placer : EditorWindow
                 for (int i = 0; i < spawnCount; i++)
                 {
                     var randPoint = UnityEngine.Random.insideUnitCircle * radius;
-                    Ray spawnRay = new Ray(hit.point + new Vector3(randPoint.x, 2f, randPoint.y), -hit.normal);
+                    Ray spawnRay = new Ray(hit.point + (hit.normal * 4f) + (tangent * randPoint.x) + (bitangent * randPoint.y), -hit.normal);
                     if (Physics.Raycast(spawnRay, out RaycastHit spawnHit))
                     {
                         var newGO = Instantiate<GameObject>(prefab, spawnHit.point, Quaternion.Euler(0f, UnityEngine.Random.Range(-180, 180), 0f), prefabContainer.transform);
