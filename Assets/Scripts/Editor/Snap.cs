@@ -11,7 +11,7 @@ public class Snap : EditorWindow
     public enum GridType { Cartesian, Polar};
     [SerializeField] GridType gridType = GridType.Cartesian;
     [SerializeField] Vector3 gridOrigin;
-    [SerializeField] float cellSize = 1;
+    [SerializeField] float cellSize;
     [SerializeField] int polarDivisions;
     
     SerializedObject so;
@@ -30,12 +30,29 @@ public class Snap : EditorWindow
 
         Selection.selectionChanged += Repaint;
         SceneView.duringSceneGui += DuringSceneGUI;
+
+        // Load saved configuration
+        gridType = (GridType) EditorPrefs.GetInt("SNAP_TOOL_gridType", 0);
+        var gridOriginX = EditorPrefs.GetFloat("SNAP_TOOL_gridOriginX", 0);
+        var gridOriginY = EditorPrefs.GetFloat("SNAP_TOOL_gridOriginY", 0);
+        var gridOriginZ = EditorPrefs.GetFloat("SNAP_TOOL_gridOriginZ", 0);
+        gridOrigin = new Vector3(gridOriginX, gridOriginY, gridOriginZ);
+        cellSize = EditorPrefs.GetFloat("SNAP_TOOL_cellSize", 1);
+        polarDivisions = EditorPrefs.GetInt("SNAP_TOOL_polarDivisions", 24);
     }
 
     private void OnDisable()
     {
         Selection.selectionChanged -= Repaint;
         SceneView.duringSceneGui -= DuringSceneGUI;
+
+        // Save configuration
+        EditorPrefs.SetInt("SNAP_TOOL_gridType", (int) gridType);
+        EditorPrefs.SetFloat("SNAP_TOOL_gridOriginX", gridOrigin.x);
+        EditorPrefs.SetFloat("SNAP_TOOL_gridOriginY", gridOrigin.y);
+        EditorPrefs.SetFloat("SNAP_TOOL_gridOriginZ", gridOrigin.z);
+        EditorPrefs.SetFloat("SNAP_TOOL_cellSize", cellSize);
+        EditorPrefs.SetInt("SNAP_TOOL_polarDivisions", polarDivisions);
     }
 
     private void DuringSceneGUI(SceneView obj)
@@ -66,7 +83,7 @@ public class Snap : EditorWindow
         if (polarDivisions >= 2)
             for (float i = 1 * cellSize; i <= polarDivisions; i++)
             {
-                Handles.DrawAAPolyLine(gridOrigin, Quaternion.AngleAxis(i * (360f / (float)polarDivisions), Vector3.up) * Vector3.forward * 10);
+                Handles.DrawAAPolyLine(gridOrigin, Quaternion.AngleAxis(i * (360f / (float)polarDivisions), Vector3.up) * Vector3.forward * 9 * cellSize);
             }
     }
 
