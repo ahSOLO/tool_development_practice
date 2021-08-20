@@ -14,7 +14,7 @@ public class Snap : EditorWindow
     [SerializeField] float cellSize;
     [SerializeField] int polarDivisions;
     
-    SerializedObject so;
+    SerializedObject sO;
     SerializedProperty propGridType;
     SerializedProperty propCellSize;
     SerializedProperty propGridOrigin;
@@ -22,11 +22,11 @@ public class Snap : EditorWindow
 
     private void OnEnable()
     {
-        so = new SerializedObject(this);
-        propGridType = so.FindProperty("gridType");
-        propCellSize = so.FindProperty("cellSize");
-        propGridOrigin = so.FindProperty("gridOrigin");
-        propPolarDivisions = so.FindProperty("polarDivisions");
+        sO = new SerializedObject(this);
+        propGridType = sO.FindProperty("gridType");
+        propCellSize = sO.FindProperty("cellSize");
+        propGridOrigin = sO.FindProperty("gridOrigin");
+        propPolarDivisions = sO.FindProperty("polarDivisions");
 
         Selection.selectionChanged += Repaint;
         SceneView.duringSceneGui += DuringSceneGUI;
@@ -101,7 +101,7 @@ public class Snap : EditorWindow
 
     private void OnGUI()
     {
-        so.Update();
+        sO.Update();
             EditorGUILayout.PropertyField(propGridType);
             EditorGUILayout.PropertyField(propGridOrigin);
             EditorGUILayout.PropertyField(propCellSize);
@@ -110,7 +110,7 @@ public class Snap : EditorWindow
                 EditorGUILayout.PropertyField(propPolarDivisions);
                 propPolarDivisions.intValue = Math.Max(2, propPolarDivisions.intValue);
             }
-        so.ApplyModifiedProperties();
+        sO.ApplyModifiedProperties();
 
         using (new EditorGUI.DisabledScope(Selection.gameObjects.Length == 0))
         {
